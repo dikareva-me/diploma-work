@@ -72,17 +72,55 @@ def y_calc(m, c1, c2, a, l):
                 y += a * (-1)**(i) * (1 - v1(x - l[i-2]))
         y_vec.append(y )
 
+    print("start stop ", start, stop)
+
     x = np.arange(start, stop, step)
     return x, y_vec
 
 
+def M_calc(E, I, m, c1, c2,a, l):
+    M_vec = []
+    start = m
+    stop = 30*m
+    step = m
+    iter = 0
+    M_ = 0
+    for x in np.arange(start, stop, step):
+        iter += 1
+        if x >= 0:
+            M_ = -v3(x)*c1-v4(x)*c2
+        for i in range (2, len(l)+1):
+            if x >= l[i - 2]:
+                M_ += a * (-1)**(i) *  v3(x - l[i-2])
+        M_ *= 4 * E * I * m**2
+        M_vec.append(M_)
+    
+    x = np.arange(start, stop, step)
+    return x, M_vec
+
+
+
+def Q_calc(E, I, m, c1, c2,a, l):
+    Q_vec = []
+    start = m
+    stop = 30*m
+    step = m
+    iter = 0
+    for x in np.arange(start, stop, step):
+        iter += 1
+        if x >= 0:
+            Q = -v2(x)*c1-v3(x)*c2
+        for i in range (2, len(l)+1):
+            if x >= l[i - 2]:
+               Q += a * (-1)**(i) *  v2(x - l[i-2])
+        Q *= 4 * E * I * m**3
+        Q_vec.append(Q)
+
+    x = np.arange(start, stop, step)
+    return x, Q_vec
+
 
 if __name__ == "__main__":
-    # length = [6.7, 15.6, 23.5, 27.45]
-    # T = 10.0
-    # k= 80000
-    # I= 3.97
-    # E = 2.1 * (10**7)
     length = [6.7, 15.6, 23.5, 27.45]
     T = 10.0
     k= 80000
@@ -108,22 +146,26 @@ if __name__ == "__main__":
     c = np.linalg.solve(coef, b)
     print(c)
     new_c = coef[:2,:2]
-    # new_c = []
-    # for i in range(2):
-    #     for j in range(3):
-    #         new_c[i][j] = coef[i][j]
 
     a = coef[:2, 2]
     x = np.linalg.solve(new_c, a)
     print(x)
-    # for i in range(0,2):
-    #     print(coef[i][0], coef[i][1], coef[i][2])
+
+
     x, y = y_calc(m, c[0], c[1], c[2], l)
-  #  plt.semilogy(x, y)
-    plt.plot(x, y, )
-        
+    plt.plot(x, y )    
     plt.xlabel("x")
     plt.ylabel("y, см")
     plt.grid()
     plt.show()
 
+    x, M = M_calc(E, I, m, c[0], c[1], c[2], l)
+    plt.plot(x, M ,  label="M - изгибающий момент")
+    x, Q = Q_calc(E, I, m, c[0], c[1], c[2], l)
+    plt.plot(x,Q , label="Q - перерезывающая сила")
+        
+    plt.xlabel("x")
+    plt.ylabel("M, Н*см; Q, Н")
+    plt.grid()
+    plt.legend()
+    plt.show()
