@@ -5,21 +5,21 @@ from main import y_calc
 
 
 
-def get_a_b(a, n, E, I, k, h, T):
-    A = np.zeros((sum(n)+1, sum(n)+1))
-    b = np.zeros(sum(n)+1)
+def get_a_b(n, E, I, h, T, m):
+    A = np.zeros((sum(n)+2, sum(n)+2))
+    print(sum(n)+1)
+    b = np.zeros(sum(n)+2)
 
     A[0, 0] = 2+4*h**4
     A[0, 1] = -4
     A[0, 2] = 2
-    b[0] = 0
+    A[0, -1] = 0
     print(*A[0])
 
     A[1, 0] = -2
     A[1, 1] = 5 + 4*h**4
     A[1, 2] = -4
     A[1, 3] = 1
-    b[1] = 0
     print(*A[1])
 
     #1 отрезок = 0
@@ -29,73 +29,63 @@ def get_a_b(a, n, E, I, k, h, T):
         A[i, i] =  6 + 4*h**4
         A[i, i+1] = -4
         A[i, i+2] = 1
-        b[i] = 0
         print(*A[i])
     
-    b[n[0]] =2*a*h**4
+    A[n[0], -1] =2*h**4
+    
 
 
     # #2 отрезок = kah/ei
     for i in range(n[0]+1, n[0]+n[1]+1):
-        b[i] = 4*a*h**4
+        A[i, -1] = 4*h**4
 
-    b[n[0]+n[1]] = 2*a*h**4
-    
-    # #3 отрезок = 0
+    A[n[0]+n[1], -1] = 2*h**4
+
     for i in range(n[0]+n[1]+1, n[0]+n[1]+n[2]+1):
-        b[i] = 0
-    #     print(*A[i])
+        A[i, -1] = 0
 
-    b[n[0]+n[1]+n[2]] = 2*a*h**4
+    A[n[0]+n[1]+n[2], -1] = 2*h**4
 
-    # #4 отрезок
     for i in range(n[0]+n[1]+n[2]+1, n[0]+n[1]+n[2]+n[3]-1):
-        b[i] = 4*a*h**4
-    #     print(*A[i])
+        A[i, -1] = 4*h**4
     
 
     A[n[0]+n[1]+n[2]+n[3]-1, n[0]+n[1]+n[2]+n[3]-3] = 1
     A[n[0]+n[1]+n[2]+n[3]-1, n[0]+n[1]+n[2]+n[3]-2] = -4
     A[n[0]+n[1]+n[2]+n[3]-1, n[0]+n[1]+n[2]+n[3]-1] = 7 + 4*h**4
     A[n[0]+n[1]+n[2]+n[3]-1, n[0]+n[1]+n[2]+n[3]] = -4
-    b[n[0]+n[1]+n[2]+n[3]-1] = 4*a*h**4
+    A[n[0]+n[1]+n[2]+n[3]-1, -1] = 4*h**4
     print(*A[n[0]+n[1]+n[2]+n[3]-1])
 
     A[n[0]+n[1]+n[2]+n[3], n[0]+n[1]+n[2]+n[3]-2] = 2
     A[n[0]+n[1]+n[2]+n[3], n[0]+n[1]+n[2]+n[3]-1] = -8
     A[n[0]+n[1]+n[2]+n[3], n[0]+n[1]+n[2]+n[3]] = 6 + 4*h**4
-    b[n[0]+n[1]+n[2]+n[3]] = 4*a*h**4
+    A[n[0]+n[1]+n[2]+n[3], -1] = 4*h**4
 
-    # A[-1, n[0]-2]=1
-    # A[-1, n[0]-1]=-4
-    # A[-1, n[0]]=1
-    # A[-1, n[0]+1]=-4
-    # A[-1, n[0]+2]=1
+    A[-1, n[0]-2]=-1
+    A[-1, n[0]-1]=2
+    A[-1, n[0]+1]=-2
+    A[-1, n[0]+2]=1
 
-    # A[-1, n[1]-2]=-1
-    # A[-1, n[1]-1]= 4
-    # A[-1, n[1]]=-1
-    # A[-1, n[1]+1]= 4
-    # A[-1, n[1]+2]=-1
+    A[-1, n[0]+n[1]-2]=1
+    A[-1, n[0]+n[1]-1]= -2
+    A[-1, n[0]+n[1]+1]= 2
+    A[-1, n[0]+n[1]+2]=-1
 
-    # A[-1, n[2]-2]=1
-    # A[-1, n[2]-1]=-4
-    # A[-1, n[2]]=1
-    # A[-1, n[2]+1]=-4
-    # A[-1, n[2]+2]=1
+    A[-1, n[0]+n[1]+n[2]-2]=-1
+    A[-1, n[0]+n[1]+n[2]-1]=2
+    A[-1, n[0]+n[1]+n[2]+1]=-2
+    A[-1, n[0]+n[1]+n[2]+2]=1
+    A[-1, -1] = -6*h**4
 
-    # b[-1] = -T/(2*E*I)
+    b[-1] = -T*h**3/(E*I*m**3)
 
     
     print(*A[n[0]+n[1]+n[2]+n[3]])
+    print(*A[-1])
+    print([row[-1] for row in A])
+    print(*b)
 
-    # #print(A)
-    # for lst in A:
-    #     for el in lst:
-    #         print(f'{el:.{1}f}', end=' ')
-    #     print()
-    # Get b
-   
     return A, b
 
 
@@ -120,27 +110,29 @@ if __name__ == "__main__":
 
     h = 0.1
     l_round = [round(i, 1) for i in l]
-    for i in range(1, len(l_round)):
-        print(l_round[i] - l_round[i-1])
     n = [int((l_round[i] - l_round[i-1])/h) for i in range(1, len(l))]
     print(l_round, n)
     # for i in range(len(n)):
     #     for j in range(n[i]):
     #         x.append(l_round[i]+h*j)
     # x.append(3.4)
-    
     x = [i * 0.1 for i in range(34)]
     print(x)
-    print(len(x))
+
     x_list = [i/m for i in x]
-    A, b = get_a_b(a, n, E, I, k,h, T)
+    A, b = get_a_b(n, E, I, h, T, m)
     print(b)
+    # b=A[:,-1]
+    # b=b[:-1]
+    # A = A[:-1, :-1]
+    
 
     y = np.linalg.solve(A, b)
     print(y)
+    a = y[-1]
     print(a)
 
-
+    y = y[:-1]
     plt.plot(x, y )     
     plt.xlabel("x")
     plt.ylabel("y, см")
